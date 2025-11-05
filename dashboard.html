@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBAC Dashboard</title>
+<style>
+  body { font-family: Arial; text-align:center; margin-top:50px; }
+  button { padding:10px 20px; border:none; background:#007BFF; color:white; border-radius:4px; cursor:pointer; margin-top:20px; }
+</style>
+</head>
+<body>
+
+<h1>Dashboard</h1>
+<p id="role-msg"></p>
+
+<button id="admin-btn">Admin Page</button>
+<button id="moderator-btn">Moderator Page</button>
+<button id="user-btn">User Page</button>
+<button id="logout-btn">Logout</button>
+
+<script>
+const token = localStorage.getItem('token');
+const roleMsg = document.getElementById('role-msg');
+
+if(!token){
+  alert('Access denied. Please login.');
+  window.location.href = 'index.html';
+}
+
+function fetchProtected(endpoint){
+  fetch(`http://localhost:5000/${endpoint}`, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(res => {
+    if(res.status !== 200) throw new Error('Access denied');
+    return res.json();
+  })
+  .then(data => alert(data.message))
+  .catch(err => alert('Access denied or insufficient role'));
+}
+
+document.getElementById('admin-btn').addEventListener('click', () => fetchProtected('admin'));
+document.getElementById('moderator-btn').addEventListener('click', () => fetchProtected('moderator'));
+document.getElementById('user-btn').addEventListener('click', () => fetchProtected('user'));
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem('token');
+  window.location.href = 'index.html';
+});
+</script>
+
+</body>
+</html>
